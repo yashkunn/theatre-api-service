@@ -17,7 +17,6 @@ PERFORMANCE_URL = reverse("theatre:performance-list")
 RESERVATION_URL = reverse("theatre:reservation-list")
 
 
-
 def sample_play(**params):
     defaults = {
         "title": "Sample play",

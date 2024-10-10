@@ -110,7 +110,7 @@ class PlayViewSet(
         detail=True,
         methods=["POST"],
         url_path="upload-image",
-        permission_classes=[IsAdminUser]
+        permission_classes=[IsAdminUser],
     )
     def upload_image(self, request, pk=None):
         play = self.get_object()
