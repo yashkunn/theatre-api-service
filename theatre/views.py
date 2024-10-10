@@ -151,7 +151,7 @@ class PerformanceViewSet(viewsets.ModelViewSet):
         .select_related("play", "theatre_hall")
         .annotate(
             tickets_available=(
-                F("theatre_hall__rows") * F("theatre_hall__seat_in_row")
+                F("theatre_hall__rows") * F("theatre_hall__seats_in_row")
                 - Count("tickets")
             )
         )
