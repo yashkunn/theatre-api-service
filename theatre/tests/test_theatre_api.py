@@ -183,8 +183,8 @@ class AuthenticatedPlayApiTests(TestCase):
 
     # def test_create_reservation(self):
     #     """Test creating a reservation for authenticated users"""
-    #     performance = sample_performance()  # Виклик функції для отримання дійсного об'єкта Performance
-    #
+    #     performance = sample_performance()
+
     #     payload = {
     #         "tickets": [
     #             {"row": 1, "seat": 1, "performance": performance.id},
