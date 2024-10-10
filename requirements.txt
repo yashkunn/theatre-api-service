@@ -6,6 +6,7 @@ colorama==0.4.6
 Django==5.1.2
 django-debug-toolbar==4.4.6
 djangorestframework==3.15.2
+djangorestframework-simplejwt==5.3.1
 drf-spectacular==0.27.2
 inflection==0.5.1
 jsonschema==4.23.0
@@ -15,6 +16,8 @@ packaging==24.1
 pathspec==0.12.1
 pillow==10.4.0
 platformdirs==4.3.6
+psycopg2-binary==2.9.9
+PyJWT==2.9.0
 PyYAML==6.0.2
 referencing==0.35.1
 rpds-py==0.20.0
