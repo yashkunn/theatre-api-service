@@ -9,7 +9,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from theatre.models import Play, Performance, TheatreHall, Genre, Actor, Reservation
+from theatre.models import Play, Performance, TheatreHall, Genre, Actor, Reservation, Ticket
 from theatre.serializers import PlayListSerializer, PlayDetailSerializer
 
 PLAY_URL = reverse("theatre:play-list")
@@ -166,6 +166,14 @@ class AuthenticatedPlayApiTests(TestCase):
             "testpass",
         )
         self.client.force_authenticate(self.user)
+        self.play = sample_play()
+        self.theatre_hall = TheatreHall.objects.create(rows=5, seats_in_row=10)
+
+        self.performance = sample_performance(
+            play=self.play,
+            theatre_hall=self.theatre_hall,
+            show_time="2024-10-11T19:00:00Z"
+        )
 
     def test_list_reservations(self):
         """Test listing reservations for authenticated users"""
@@ -181,28 +189,46 @@ class AuthenticatedPlayApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
-    # def test_create_reservation(self):
-    #     """Test creating a reservation for authenticated users"""
-    #     performance = sample_performance()
+    def test_create_reservation(self):
+        reservation_data = {
+            "tickets": [
+                {
+                    "row": 1,
+                    "seat": 1,
+                    "performance": self.performance.id,
+                },
+                {
+                    "row": 1,
+                    "seat": 2,
+                    "performance": self.performance.id,
+                }
+            ]
+        }
 
-    #     payload = {
-    #         "tickets": [
-    #             {"row": 1, "seat": 1, "performance": performance.id},
-    #             {"row": 1, "seat": 2, "performance": performance.id},
-    #             {"row": 1, "seat": 3, "performance": performance.id},
-    #         ],
-    #     }
-    #
-    #     res = self.client.post(RESERVATION_URL, payload)
-    #
-    #     if res.status_code != status.HTTP_201_CREATED:
-    #         print(f"Response content: {res.content}")
-    #
-    #     self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-    #
-    #     reservation = Reservation.objects.get(id=res.data["id"])
-    #     self.assertEqual(reservation.user, self.user)
-    #     self.assertEqual(reservation.tickets.count(), 3)
+        response = self.client.post(
+            RESERVATION_URL,
+            reservation_data,
+            format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(Reservation.objects.count(), 1)
+        self.assertEqual(Ticket.objects.count(), 2)
+
+        reservation = Reservation.objects.first()
+        self.assertEqual(reservation.user, self.user)
+        self.assertEqual(reservation.tickets.count(), 2)
+
+        ticket_1 = reservation.tickets.first()
+        self.assertEqual(ticket_1.row, 1)
+        self.assertEqual(ticket_1.seat, 1)
+        self.assertEqual(ticket_1.performance, self.performance)
+
+        ticket_2 = reservation.tickets.last()
+        self.assertEqual(ticket_2.row, 1)
+        self.assertEqual(ticket_2.seat, 2)
+        self.assertEqual(ticket_2.performance, self.performance)
 
 
 class AdminPayApiTests(TestCase):
