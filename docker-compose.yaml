@@ -1,0 +1,48 @@
+services:
+  theatre:
+    build: .
+    restart: always
+    container_name: theatre-web-app
+    ports:
+      - "8001:8000"
+    volumes:
+      - .:/usr/src/app
+      - my_media:/files/media
+    env_file:
+      - .env
+    command: ["./entrypoint.sh"]
+    depends_on:
+      - db
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8000 || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - theatre_app_network
+  db:
+    image: "postgres:latest"
+    env_file:
+      - .env
+    container_name: theatre-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - theatre_db_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - theatre_app_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-d", "db_prod" ]
+      interval: 10s
+      timeout: 60s
+      retries: 5
+
+networks:
+  theatre_app_network:
+    driver: bridge
+volumes:
+  theatre_db_data:
+    driver: local
+  my_media:
+    driver: local
