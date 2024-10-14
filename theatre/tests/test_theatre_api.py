@@ -9,7 +9,15 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from theatre.models import Play, Performance, TheatreHall, Genre, Actor, Reservation, Ticket
+from theatre.models import (
+    Play,
+    Performance,
+    TheatreHall,
+    Genre,
+    Actor,
+    Reservation,
+    Ticket,
+)
 from theatre.serializers import PlayListSerializer, PlayDetailSerializer
 
 PLAY_URL = reverse("theatre:play-list")
@@ -172,7 +180,7 @@ class AuthenticatedPlayApiTests(TestCase):
         self.performance = sample_performance(
             play=self.play,
             theatre_hall=self.theatre_hall,
-            show_time="2024-10-11T19:00:00Z"
+            show_time="2024-10-11T19:00:00Z",
         )
 
     def test_list_reservations(self):
@@ -201,15 +209,11 @@ class AuthenticatedPlayApiTests(TestCase):
                     "row": 1,
                     "seat": 2,
                     "performance": self.performance.id,
-                }
+                },
             ]
         }
 
-        response = self.client.post(
-            RESERVATION_URL,
-            reservation_data,
-            format='json'
-        )
+        response = self.client.post(RESERVATION_URL, reservation_data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
