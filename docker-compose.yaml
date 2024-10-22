@@ -14,7 +14,7 @@ services:
     depends_on:
       - db
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:8000 || exit 1" ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:8001 || exit 1" ]
       interval: 10s
       timeout: 10s
       retries: 5
@@ -29,7 +29,7 @@ services:
       - "5432:5432"
     volumes:
       - theatre_db_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./path_to_init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - theatre_app_network
     healthcheck:

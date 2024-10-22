@@ -29,8 +29,8 @@ from theatre_service import settings
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/theatre/", include("theatre.urls", namespace="theatre")),
-    path("api/user/", include("user.urls", namespace="user")),
+    path("api/theatre/", include("theatre.urls", namespace="theatres")),
+    path("api/users/", include("user.urls", namespace="users")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/doc/swagger/",

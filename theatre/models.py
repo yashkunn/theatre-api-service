@@ -31,12 +31,12 @@ class Actor(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
 
-    def __str__(self):
-        return self.first_name + " " + self.last_name
-
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+
+    def __str__(self):
+        return self.full_name
 
 
 def play_image_file_path(instance, filename):
@@ -62,7 +62,9 @@ class Play(models.Model):
 
 class Performance(models.Model):
     play = models.ForeignKey(Play, on_delete=models.CASCADE)
-    theatre_hall = models.ForeignKey(TheatreHall, on_delete=models.CASCADE)
+    theatre_hall = models.ForeignKey(
+        TheatreHall, on_delete=models.CASCADE, related_name="performances"
+    )
     show_time = models.DateTimeField()
 
     class Meta:
@@ -74,7 +76,9 @@ class Performance(models.Model):
 
 class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reservations"
+    )
 
     def __str__(self):
         return str(self.created_at)
@@ -118,21 +122,18 @@ class Ticket(models.Model):
             ValidationError,
         )
 
-    def save(
-        self,
-        force_insert=False,
-        force_update=False,
-        using=None,
-        update_fields=None,
-    ):
+    def save(self, *args, **kwargs):
         self.full_clean()
-        return super(Ticket, self).save(
-            force_insert, force_update, using, update_fields
-        )
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{str(self.performance)} (row: {self.row}, seat: {self.seat})"
 
     class Meta:
-        unique_together = ("performance", "row", "seat")
+        constraints = [
+            models.UniqueConstraint(
+                fields=["performance", "row", "seat"],
+                name="unique_ticket_per_performance",
+            )
+        ]
         ordering = ["row", "seat"]

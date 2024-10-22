@@ -79,7 +79,7 @@ class PlayViewSet(
         title = self.request.query_params.get("title")
         genres = self.request.query_params.get("genres")
         actors = self.request.query_params.get("actors")
-        queryset = self.queryset
+        queryset = super().get_queryset()
 
         if title:
             queryset = queryset.filter(title__icontains=title)
@@ -103,7 +103,7 @@ class PlayViewSet(
         if self.action == "upload_image":
             return PlayImageSerializer
 
-        return PlaySerializer
+        return super().get_serializer_class()
 
     @action(
         detail=True,
@@ -145,14 +145,9 @@ class PlayViewSet(
 
 
 class PerformanceViewSet(viewsets.ModelViewSet):
-    queryset = (
-        Performance.objects.all()
-        .select_related("play", "theatre_hall")
-        .annotate(
-            tickets_available=(
-                F("theatre_hall__rows") * F("theatre_hall__seats_in_row")
-                - Count("tickets")
-            )
+    queryset = Performance.objects.select_related("play", "theatre_hall").annotate(
+        tickets_available=(
+            F("theatre_hall__rows") * F("theatre_hall__seats_in_row") - Count("tickets")
         )
     )
     serializer_class = PerformanceSerializer
@@ -161,7 +156,7 @@ class PerformanceViewSet(viewsets.ModelViewSet):
         date = self.request.query_params.get("date")
         play_id_str = self.request.query_params.get("play")
 
-        queryset = self.queryset
+        queryset = super().get_queryset()
 
         if date:
             date = datetime.strptime(date, "%Y-%m-%d").date()
@@ -178,7 +173,7 @@ class PerformanceViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return PerformanceDetailSerializer
 
-        return PerformanceSerializer
+        return super().get_serializer_class()
 
     @extend_schema(
         parameters=[
@@ -217,7 +212,7 @@ class ReservationViewSet(
     def get_serializer_class(self):
         if self.action == "list":
             return ReservationListSerializer
-        return ReservationSerializer
+        return super().get_serializer_class()
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
